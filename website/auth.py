@@ -1,10 +1,17 @@
-from flask import Blueprint
-
+from flask import Blueprint, request, render_template
 auth = Blueprint('auth', __name__)
 
-@auth.route("/")
+@auth.route('/', methods=['GET', 'POST'])
 def home():
-    return "<p>home</p>"
+ 
+    if request.method == 'POST':
+        student_id = request.form.get('student_id')
+        event_id = request.form.get('event_id')
+        print(student_id)
+        print(event_id)
+    
+        return render_template("home.html")
+    #return "<p>home</p>"
     
 @auth.route("/login")
 def login():
