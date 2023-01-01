@@ -1,17 +1,16 @@
 {% extends "base.html" %} {% block title %}Changed{% endblock %}
 
 {% block content %}
-<h1> This is home page </h1>
 <form method="post">
-  <h3 align="center">home</h3>
+  <h3 align="center">reports</h3>
   <div class="form-group">
-  <label for="student_id">student id</label> 
-  <input type="text" class="form-control" name="student_id" placeholder="enter student id">
-  <input type="text" class="form-control" name="event_id" placeholder="enter event id">
+  <label for="student_id">grade level</label> 
   <input type="text" class="form-control" name="grade_level" placeholder="enter grade level">
-  
+    
 </div>
 <br />
 <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+ {{text}} 
+ {{text2}} 
 {% endblock %}
