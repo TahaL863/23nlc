@@ -3,4 +3,17 @@
 {% block content %}
 {{text3}} 
 {{points}}
+{{items}}
+{{selected_grade}}
+<form method="post">
+    <h3 align="center">rewards</h3>
+    <div class="form-group">
+    <label for="student_id">grade level</label> 
+    <input type="text" class="form-control" name="grade_level" placeholder="enter grade level">
+    <input type="text" class="form-control" name="student_id" placeholder="enter student id">
+  </div>
+<br />
+<button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
 {% endblock %}

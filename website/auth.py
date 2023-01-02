@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template, flash
 from .models import User
 from . import db
-
+import random
 auth = Blueprint('auth', __name__)
 
 def loaddb():
@@ -79,8 +79,13 @@ def reports():
             each_item.append(eachuser.student_id)
             each_item.append(eachuser.event_id)
             items.append(each_item)
+        student_id = request.form.get('student_id')    
+        filteredUsers = User.query.filter_by(student_id=student_id, grade_level=grade_level).count()
+        points = filteredUsers
+        print('Points are:' + str(points))
 
-        return render_template("reports.html", text=items)
+
+        return render_template("reports.html", text=items, points=points)
     else:
         return render_template("reports.html") 
     #return "<p>reports</p>"
@@ -89,11 +94,62 @@ def reports():
 def rewards():
     print('rewards')
     if request.method == 'GET':
-        filteredUsers2  = User.query.filter_by(student_id='joe').all()
-        for everyuser in filteredUsers2:
-            print(everyuser.student_id, everyuser.event_id)
+
+        #User.query.filter_by(student_id='joe').all()
+
+        # query every distinct user by student id
+        #gradelist = User.query.filter_by(grade_level='9').all()
+        #user4SingleGrade = User.query.filter_by(grade_level='9').all()
+        distinctUsers = User.query.with_entities(User.student_id, User.grade_level).distinct()
+
+        pointsList = []
+        for everyduser in distinctUsers:
+            print('Student ID: ' + everyduser.student_id + ' Grade Level:' + everyduser.grade_level)
+            #query all rows for each of the above distinct user
+            # allentriesPerUser  = User.query.filter_by(student_id = everyduser.student_id).all()
+            # for user in allentriesPerUser:
+            #     print(user.student_id, user.event_id)
         
-        points = User.query.filter_by(student_id='joe').count()
-        print('Points are:' + str(points))
-    
-    return render_template("rewards.html", text3="rewards", points = points)
+            #compile total points for each user
+            points = User.query.filter_by(student_id=everyduser.student_id).count()
+            eachpoint = []
+            eachpoint.append(everyduser.student_id)
+
+            # inserted grade level because we want to report per grade
+            eachpoint.append(everyduser.grade_level)
+            eachpoint.append(points)
+            pointsList.append(eachpoint)
+            #print('Points are:' + str(points))
+        
+        # telling sort to use eachpoint[1] which is 2nd field called points as the sorting criteria
+            sorted(pointsList, key=lambda eachpoint: eachpoint[2])
+
+            for eachp in pointsList:
+                if eachp[1] == '9':
+                    print('Printing by GRADE 9')
+                    print(eachp)
+                    return render_template("rewards.html", text3="rewards", points = pointsList, selected_grade = eachp)
+              
+
+        return render_template("rewards.html", text3="rewards", points = pointsList)
+
+    if request.method == 'POST':
+        random_number = random.randint(1, 7)
+        filteredUsers3 = User.query.filter_by(id=random_number)
+        for everyuser in filteredUsers3:
+            print(everyuser.student_id, everyuser.event_id)
+        items = []
+        for eachuser in filteredUsers3:
+            print(eachuser.student_id, eachuser.event_id)
+            each_item = []
+            each_item.append(eachuser.student_id)
+            each_item.append(eachuser.event_id)
+            items.append(each_item)
+        #randomwinner = filteredUsers3
+        return render_template("rewards.html", items=items)        
+    #else:
+        return render_template("rewards.html")    
+
+
+
+      
