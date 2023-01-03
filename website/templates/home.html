@@ -1,12 +1,12 @@
 {% extends "base.html" %} {% block title %}Changed{% endblock %}
 
 {% block content %}
-<h1> This is home page </h1>
+<h1> North Creek Event Tracker </h1>
 <form method="post">
-  <h3 align="center">home</h3>
+  <label align="center">Enter Student info and click submit to Save into portal</label>
   <div class="form-group">
-  <label for="student_id">student id</label> 
-  <input type="text" class="form-control" name="student_id" placeholder="enter student id">
+  <label for="student_id">Specify student info</label> 
+  <input type="text" class="form-control" name="student_id" placeholder="enter student name">
   <input type="text" class="form-control" name="event_id" placeholder="enter event id">
   <input type="text" class="form-control" name="grade_level" placeholder="enter grade level">
   

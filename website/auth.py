@@ -61,7 +61,7 @@ def login():
     if request.method == 'GET':
         loaddb()
 
-    return "<p>login</p>"
+    return "<p>We will introduce log in ability to portal in future </p>"
 
 @auth.route('/reports', methods=['GET', 'POST'])
 def reports():
@@ -150,58 +150,6 @@ def rewards():
                 winnerList = [euser.student_id, euser.grade_level]   
                 return render_template("rewards.html", winner=winnerList)        
     else:
-        return render_template("rewards.html")    
+        return render_template("rewards.html")
 
-@auth.route("/rewards2", methods=['GET', 'POST'])
-def rewards2(): 
-    print('rewards2')
-    if request.method == ['GET']:
-
-        #User.query.filter_by(student_id='joe').all()
-
-        # query every distinct user by student id
-        #gradelist = User.query.filter_by(grade_level='9').all()
-        #user4SingleGrade = User.query.filter_by(grade_level='9').all()
-        distinctUsers = User.query.with_entities(User.student_id, User.grade_level).distinct()
-
-        pointsList = []
-        for everyduser in distinctUsers:
-            print('Student ID: ' + everyduser.student_id + ' Grade Level:' + everyduser.grade_level)
-            #query all rows for each of the above distinct user
-            # allentriesPerUser  = User.query.filter_by(student_id = everyduser.student_id).all()
-            # for user in allentriesPerUser:
-            #     print(user.student_id, user.event_id)
-        
-            #compile total points for each user
-            points = User.query.filter_by(student_id=everyduser.student_id).count()
-            eachpoint = []
-            eachpoint.append(everyduser.student_id)
-
-            # inserted grade level because we want to report per grade
-            eachpoint.append(everyduser.grade_level)
-            eachpoint.append(points)
-            pointsList.append(eachpoint)
-            #print('Points are:' + str(points))
-        
-        # telling sort to use eachpoint[1] which is 2nd field called points as the sorting criteria
-            sorted(pointsList, key=lambda eachpoint: eachpoint[2])
-        if request.method == ['POST']:   
-            grade_level = request.form.get('grade_level')
-
-            for eachp in pointsList:
-                if eachp[1] == grade_level:
-                    print('Printing by GRADE 9')
-                    print(eachp)
-                    return render_template("rewards2.html", text3="rewards", points = pointsList, selected_grade = eachp)
-            #for eachp2 in pointsList:
-                #if eachp2[1] == '10':
-                   # print('Printing by GRADE 10')
-                    #print(eachp)
-                    #return render_template("rewards.html", text3="rewards", points = pointsList, selected_grade = eachp, selected_grade2 = eachp2)
-                
-
-        #return render_template("rewards.html", text3="rewards", points = pointsList)
-
-
-    return render_template("rewards2.html")  
       
