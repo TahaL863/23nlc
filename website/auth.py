@@ -72,6 +72,7 @@ def reports():
         print('Grade level selected for report is:' + grade_level)
 
         filteredUsers = User.query.filter_by(grade_level=grade_level).all()
+        #distinctUsers = User.query.with_entities(User.student_id, User.grade_level).distinct().count()
         items = []
         for eachuser in filteredUsers:
             print(eachuser.student_id, eachuser.event_id)
@@ -127,6 +128,16 @@ def rewards():
 
             if eachp[1] not in grade_dict.keys():
                 grade_dict[eachp[1]] = eachp[1]
+
+                pointsforreward = eachp[2]
+                if pointsforreward >= 7: 
+                    prizeComment="you won first place"
+                elif pointsforreward >= 4 and points < 7:
+                    prizeComment="you won second place"
+                elif pointsforreward >= 1 and points < 4:
+                    prizeComment="you won third place"
+
+                eachp.append(prizeComment)
                 print(eachp)
                 highestPbyGradeList.append(eachp)
 
@@ -148,8 +159,16 @@ def rewards():
                 counter = counter+1
             elif counter == random_number:
                 winnerList = [euser.student_id, euser.grade_level]   
-                return render_template("rewards.html", winner=winnerList)        
-    else:
+                
+                filteredUsers = User.query.filter_by(student_id=euser.student_id).count()
+                points = filteredUsers
+                print(points)
+                if points >= 7:
+                    return render_template("rewards.html", winner=winnerList, reward1 = "you won first place")        
+                elif points >= 4 and points < 7:
+                    return render_template("rewards.html", winner=winnerList, reward2 = "you won second place")
+                elif points >= 1 and points < 4:
+                    return render_template("rewards.html", winner=winnerList, reward2 = "you won second place")
         return render_template("rewards.html")
 
       
