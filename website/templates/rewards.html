@@ -1,22 +1,61 @@
 {% extends "base.html" %} {% block title %}Changed{% endblock %}
-
 {% block content %}
-{{text3}} 
-{{items}}
-{{elected_grade}}
 
 <form method="post">
     <h3 align="center">Rewards</h3>
+    <table id="data" class="table table-striped">
+        <thead>
+            <h5 align="center">Winners with highest points in each grade</h5>
+            <tr align="center">
+            <th>Name</th>
+            <th>Grade</th>
+            <th>Points</th>
+            <th>Prize</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for eachStudent in highestPbyGrades %}
+            <tr align="center">
+              <td>{{ eachStudent[0]}}</td>
+              <td>{{ eachStudent[1]}}</td>
+              <td>{{ eachStudent[2]}}</td>
+              <td>{{ eachStudent[3]}}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>    
     <div class="form-group">
     <label for="student_id">select a grade level to choose a random winner from</label> 
     <input type="text" class="form-control" name="grade_level" placeholder="enter grade level">
-    <input type="text" class="form-control" name="student_name" placeholder="enter student name">
-  </div>
+    </div>
 <br />
 <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-{{winner}}
-{{reward1}}
-{{reward2}}
-{{reward3}}
+
+<!-- {{winner}}
+{{reward}} -->
+
+<table id="data" class="table table-striped">
+    <thead>
+        <br />
+        <br />
+        <h5 align="center">Random winner from selected grade level</h5>
+        <tr align="center">
+        <th>Name</th>
+        <th>Grade</th>
+        <th>Points</th>
+        <th>Prize</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for w in winner %}
+            <tr align="center">
+                <td>{{w[0]}}</td>
+                <td>{{w[1]}}</td>
+                <td>{{w[2]}}</td>
+                <td>{{reward}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>    
 {% endblock %}

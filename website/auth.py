@@ -54,7 +54,7 @@ def login():
     if request.method == 'GET':
         loaddb()
 
-    return "<p>We will introduce log in ability to portal in future </p>"
+    return "<p>We will introduce log in ability to portal in future. Press back in browser </p>"
 
 @auth.route('/reports', methods=['GET','POST'])
 def reports():
@@ -73,6 +73,7 @@ def reports():
 
     for eachUStd in uniqueStudentList:
         #print(eachUStd)
+        # not grade level means it was empty
         if grade_level is None or not grade_level or eachUStd.grade_level == grade_level:
             pointsPerStudent = User.query.filter_by(student_name=eachUStd.student_name).count()
             eachStudentPoint = []
@@ -141,11 +142,10 @@ def get_rewards():
 @auth.route('/rewards', methods =['GET', 'POST'])
 def rewards():
     print('rewards')
-    if request.method == 'GET':
-        highestPbyGradeList = get_rewards()
-        return render_template("rewards.html", text3="rewards", elected_grade = highestPbyGradeList)
+        
+    highestPbyGradeList = get_rewards()
                                
-    elif request.method == 'POST':
+    if request.method == 'POST':
         grade_level = request.form.get('grade_level')
         maxUsersByGrade = User.query.filter_by(grade_level=grade_level).count()
         # print('MaxUsersByGrade:' + str(maxUsersByGrade))
@@ -161,17 +161,23 @@ def rewards():
                 counter = counter+1
             elif counter == random_number:
             
-                winnerList = [euser.student_name, euser.grade_level]   
+                winnerList = []
+                eachWinner = []
+                eachWinner.append(euser.student_name)
+                eachWinner.append(euser.grade_level)
                 
-                filteredUsers = User.query.filter_by(student_name=euser.student_name).count()
-                points = filteredUsers
-                print(points)
+                points = User.query.filter_by(student_name=euser.student_name).count()
+                eachWinner.append(points)
+                winnerList.append(eachWinner)
+                #print(points)
                 if points >= 7:
-                    return render_template("rewards.html", winner=winnerList, reward1 = "you won first place")        
+                    rewardsString = "you won first place"        
                 elif points >= 4 and points < 7:
-                    return render_template("rewards.html", winner=winnerList, reward2 = "you won second place")
+                    rewardsString = "you won second place"
                 elif points >= 1 and points < 4:
-                    return render_template("rewards.html", winner=winnerList, reward3 = "you won third place")
-        return render_template("rewards.html")
+                    rewardsString = "you won third place"
+                return render_template("rewards.html", highestPbyGrades=highestPbyGradeList, winner=winnerList, reward=rewardsString)
+
+    return render_template("rewards.html", highestPbyGrades=highestPbyGradeList)
 
       

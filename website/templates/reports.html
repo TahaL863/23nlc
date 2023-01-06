@@ -10,5 +10,24 @@
 <br />
 <button type="submit" class="btn btn-primary">Submit</button>
 </form>
- {{studentView}} 
+ <!-- {{studentView}}  -->
+ <table id="data" class="table table-striped">
+  <thead>
+    <tr align="center">
+      <th>Name</th>
+      <th>Grade</th>
+      <th>Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for student in studentView %}
+      <tr align="center">
+        <td>{{ student[0]}}</td>
+        <td>{{ student[1]}}</td>
+        <td>{{ student[2]}}</td>
+        <!-- <td>{{ student.student_grade }}</td> -->
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
