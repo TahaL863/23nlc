@@ -69,22 +69,22 @@ def reports():
     # query filter by student id and count should be its points
     uniqueStudentList = User.query.with_entities(User.student_name, User.grade_level).distinct()
 
-    items=[]
+    studentPointsList=[]
 
     for eachUStd in uniqueStudentList:
         #print(eachUStd)
-        if grade_level is None or eachUStd.grade_level == grade_level:
+        if grade_level is None or not grade_level or eachUStd.grade_level == grade_level:
             pointsPerStudent = User.query.filter_by(student_name=eachUStd.student_name).count()
-            each_item = []
-            each_item.append(eachUStd.student_name)
-            each_item.append(eachUStd.grade_level)
-            each_item.append(pointsPerStudent)
-            items.append(each_item)
+            eachStudentPoint = []
+            eachStudentPoint.append(eachUStd.student_name)
+            eachStudentPoint.append(eachUStd.grade_level)
+            eachStudentPoint.append(pointsPerStudent)
+            studentPointsList.append(eachStudentPoint)
     
     # sort results by grade
-    items.sort(key=lambda each_item: each_item[1], reverse=True)
-    print(items)
-    return render_template("reports.html", text=items)
+    studentPointsList.sort(key=lambda eachStudentPoint: eachStudentPoint[1], reverse=True)
+    print(studentPointsList)
+    return render_template("reports.html", studentView=studentPointsList)
 
 def get_rewards():
         # query every distinct user by student id
