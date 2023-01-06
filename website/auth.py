@@ -3,58 +3,51 @@ from .models import User
 from . import db
 import random
 auth = Blueprint('auth', __name__)
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 def loaddb():
+    #reports_scheduler()
     users = User.query.all()
     print(users) 
     
     for everyuser in users:
-        if everyuser.student_id is not None:
+        if everyuser.student_name is not None:
             print("ID:" + str(everyuser.id),
-            " STD ID:" + everyuser.student_id, 
-            " EV ID:" + everyuser.event_id,
+            " STD Name:" + everyuser.student_name, 
+            " EV Name:" + everyuser.event_name,
             " GR LV:" + everyuser.grade_level)
 
         else:
             print(everyuser)
             print("is none") 
 
+def reports_scheduler():
+    print('Scheduler initialized')
+    scheduler = BlockingScheduler()
+    scheduler.add_job(get_rewards(), 'interval', seconds=10) 
+    #hours=0.017)
+    scheduler.start()
+
 @auth.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        student_id = request.form.get('student_id')
-        event_id = request.form.get('event_id')
+        student_name = request.form.get('student_name')
+        event_name = request.form.get('event_name')
         grade_level = request.form.get('grade_level')
-        print(student_id)
-        print(event_id)
+        print(student_name)
+        print(event_name)
         print(grade_level)
-        new_user = User(student_id=student_id, event_id=event_id, grade_level=grade_level)
+        new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_level)
         db.session.add(new_user)
         db.session.commit()
         
         #flash('Account created!', category='success')
         print('Field writen to DB')
-        user = User.query.filter_by(student_id=student_id).first()
+        user = User.query.filter_by(student_name=student_name).first()
 
-        print('Event ID:' + user.event_id, ' Grade Level:'  + user.grade_level)       
-
-        # following just prints all users to check if they were written
-        #users = User.query.all()
-        #print(users) 
-
-        #for everyuser in users:
-            #print(everyuser.student_id, everyuser.event_id)
-
-        #print(student_id)
-    #if request.method == 'GET':
-        #student_id = request.form.get('student_id')
-       # event_id = request.form.get('event_id')
-        #grade_level = request.form.get('grade_level')
-       # user = User.query.filter_by(grade_level=9)
+        print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)       
         return render_template("home.html")
- 
-    #return "<p>home</p>"
-    
+     
 @auth.route("/login", methods=['GET'])
 def login():
     print('IN LOGIN')
@@ -63,54 +56,52 @@ def login():
 
     return "<p>We will introduce log in ability to portal in future </p>"
 
-@auth.route('/reports', methods=['GET', 'POST'])
+@auth.route('/reports', methods=['GET','POST'])
 def reports():
     if request.method == 'POST':
-       #student_id = request.form.get('student_id')
-       #event_id = request.form.get('event_id')
         grade_level = request.form.get('grade_level')
         print('Grade level selected for report is:' + grade_level)
-
-        filteredUsers = User.query.filter_by(grade_level=grade_level).all()
-        #distinctUsers = User.query.with_entities(User.student_id, User.grade_level).distinct().count()
-        items = []
-        for eachuser in filteredUsers:
-            print(eachuser.student_id, eachuser.event_id)
-            each_item = []
-            each_item.append(eachuser.student_id)
-            each_item.append(eachuser.event_id)
-            items.append(each_item)
-        student_id = request.form.get('student_id')    
-        filteredUsers = User.query.filter_by(student_id=student_id, grade_level=grade_level).count()
-        points = filteredUsers
-        print('Points are:' + str(points))
-
-
-        return render_template("reports.html", text=items, points=points)
     else:
-        return render_template("reports.html") 
-    #return "<p>reports</p>"
+        grade_level = None
 
-@auth.route('/rewards', methods =['GET', 'POST'])
-def rewards():
-    print('rewards')
-    if request.method == 'GET':
+    # logic for calculating points
+    # for each unique student
+    # query filter by student id and count should be its points
+    uniqueStudentList = User.query.with_entities(User.student_name, User.grade_level).distinct()
 
+    items=[]
+
+    for eachUStd in uniqueStudentList:
+        #print(eachUStd)
+        if grade_level is None or eachUStd.grade_level == grade_level:
+            pointsPerStudent = User.query.filter_by(student_name=eachUStd.student_name).count()
+            each_item = []
+            each_item.append(eachUStd.student_name)
+            each_item.append(eachUStd.grade_level)
+            each_item.append(pointsPerStudent)
+            items.append(each_item)
+    
+    # sort results by grade
+    items.sort(key=lambda each_item: each_item[1], reverse=True)
+    print(items)
+    return render_template("reports.html", text=items)
+
+def get_rewards():
         # query every distinct user by student id
-        distinctUsers = User.query.with_entities(User.student_id, User.grade_level).distinct()
+        distinctUsers = User.query.with_entities(User.student_name, User.grade_level).distinct()
 
         pointsList = []
         for everyduser in distinctUsers:
-            #print('Student ID: ' + everyduser.student_id + ' Grade Level:' + everyduser.grade_level)
+            #print('Student ID: ' + everyduser.student_name + ' Grade Level:' + everyduser.grade_level)
             #query all rows for each of the above distinct user
-            # allentriesPerUser  = User.query.filter_by(student_id = everyduser.student_id).all()
+            # allentriesPerUser  = User.query.filter_by(student_name = everyduser.student_name).all()
             # for user in allentriesPerUser:
-            #     print(user.student_id, user.event_id)
+            #     print(user.student_name, user.event_name)
         
             #compile total points for each user
-            points = User.query.filter_by(student_id=everyduser.student_id).count()
+            points = User.query.filter_by(student_name=everyduser.student_name).count()
             eachpoint = []
-            eachpoint.append(everyduser.student_id)
+            eachpoint.append(everyduser.student_name)
 
             # inserted grade level because we want to report per grade
             eachpoint.append(everyduser.grade_level)
@@ -118,12 +109,15 @@ def rewards():
             pointsList.append(eachpoint)
             #print('Points are:' + str(points))
         
-        # telling sort to use eachpoint[1] which is 2nd field called points as the sorting criteria
+        # telling sort to use eachpoint[2] which is 2nd field called points as the sorting criteria
         sorted(pointsList, key=lambda eachpoint: eachpoint[2])
+        pointsList.sort(key=lambda each_item: each_item[2], reverse=True)
+        #items.sort(key=lambda each_item: each_item[1], reverse=True)
 
         # dictionary to see if we already found highest points for that grade
         grade_dict = {}
         highestPbyGradeList = []
+      
         for eachp in pointsList:
 
             if eachp[1] not in grade_dict.keys():
@@ -141,6 +135,14 @@ def rewards():
                 print(eachp)
                 highestPbyGradeList.append(eachp)
 
+        return highestPbyGradeList
+
+
+@auth.route('/rewards', methods =['GET', 'POST'])
+def rewards():
+    print('rewards')
+    if request.method == 'GET':
+        highestPbyGradeList = get_rewards()
         return render_template("rewards.html", text3="rewards", elected_grade = highestPbyGradeList)
                                
     elif request.method == 'POST':
@@ -158,9 +160,10 @@ def rewards():
             if counter < random_number:
                 counter = counter+1
             elif counter == random_number:
-                winnerList = [euser.student_id, euser.grade_level]   
+            
+                winnerList = [euser.student_name, euser.grade_level]   
                 
-                filteredUsers = User.query.filter_by(student_id=euser.student_id).count()
+                filteredUsers = User.query.filter_by(student_name=euser.student_name).count()
                 points = filteredUsers
                 print(points)
                 if points >= 7:
@@ -168,7 +171,7 @@ def rewards():
                 elif points >= 4 and points < 7:
                     return render_template("rewards.html", winner=winnerList, reward2 = "you won second place")
                 elif points >= 1 and points < 4:
-                    return render_template("rewards.html", winner=winnerList, reward2 = "you won second place")
+                    return render_template("rewards.html", winner=winnerList, reward3 = "you won third place")
         return render_template("rewards.html")
 
       
