@@ -78,10 +78,17 @@ def reports():
 
     studentPointsList=[]
 
+    # Used to dynamically store unique grades for which we have students and use it in drop downs
+    grade_dict = {}
+
     for eachUStd in uniqueStudentList:
         #print(eachUStd)
         # not grade level means it was empty
         if grade_level is None or not grade_level or eachUStd.grade_level == grade_level:
+
+            if eachUStd.grade_level not in grade_dict.keys():
+                grade_dict[eachUStd.grade_level] = eachUStd.grade_level
+
             pointsPerStudent = User.query.filter_by(student_name=eachUStd.student_name).count()
             eachStudentPoint = []
             eachStudentPoint.append(eachUStd.student_name)
@@ -93,8 +100,7 @@ def reports():
     studentPointsList.sort(key=lambda eachStudentPoint: eachStudentPoint[1], reverse=True)
     #print(studentPointsList)
 
-    gradesInputList = [9, 10, 11]
-    return render_template("reports.html", studentView=studentPointsList, gradesInput=gradesInputList)
+    return render_template("reports.html", studentView=studentPointsList, gradesInput=grade_dict)
 
 def get_rewards():
         # query every distinct user by student id

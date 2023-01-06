@@ -4,7 +4,7 @@
 <form method="post">
   <h3 align="center">Reports</h3>
   <div class="form-group">
-    <label align="center">View Student by Grade. Drop down will dynamically allow only those grades with saved info</label>
+    <label align="center">View Students by Grade. Drop down will dynamically allow only those grades with saved info</label>
     <select name="grades_field" class="form-control" method="GET" action="/">
       <option value="{{gradesInput[0]}}" selected> Select grade level and click button below to filter reports</option>    
       {% for eachgrade in gradesInput %}
