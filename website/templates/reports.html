@@ -6,11 +6,14 @@
   <div class="form-group">
   <label for="student_id">Select the grade level you want to view</label> 
   <input type="text" class="form-control" name="grade_level" placeholder="Enter grade level to filter">
+  <!-- <select name=grades>
+    {% for eachgrade in grades %}
+    <option value="{{grade}}" SELECTED> {{grades}}
+    {% endfor %} -->
 </div>
 <br />
 <button type="submit" class="btn btn-primary">Submit</button>
 </form>
- <!-- {{studentView}}  -->
  <table id="data" class="table table-striped">
   <thead>
     <tr align="center">
@@ -25,7 +28,6 @@
         <td>{{ student[0]}}</td>
         <td>{{ student[1]}}</td>
         <td>{{ student[2]}}</td>
-        <!-- <td>{{ student.student_grade }}</td> -->
       </tr>
     {% endfor %}
   </tbody>

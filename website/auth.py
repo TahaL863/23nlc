@@ -34,19 +34,25 @@ def home():
         student_name = request.form.get('student_name')
         event_name = request.form.get('event_name')
         grade_level = request.form.get('grade_level')
-        print(student_name)
-        print(event_name)
-        print(grade_level)
-        new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_level)
-        db.session.add(new_user)
-        db.session.commit()
-        
-        #flash('Account created!', category='success')
-        print('Field writen to DB')
-        user = User.query.filter_by(student_name=student_name).first()
+        spacecheck=student_name.split()
+        # print(spacecheck)
+        # print('Len:' + str(len(spacecheck)))
+        # print(student_name.isalpha())
 
-        print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)       
-        return render_template("home.html")
+        # Name validation
+        if len(spacecheck) == 2 and spacecheck[0].isalpha() and spacecheck[1].isalpha():
+            flash('Entry inputed', category='success')
+            new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_level)
+            db.session.add(new_user)
+            db.session.commit()
+        
+            print('Field written to DB')
+            user = User.query.filter_by(student_name=student_name).first()
+
+            print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)
+        else:
+            flash('student name must be alphabetic and have one space in between', category='error')           
+    return render_template("home.html")
      
 @auth.route("/login", methods=['GET'])
 def login():
@@ -126,11 +132,11 @@ def get_rewards():
 
                 pointsforreward = eachp[2]
                 if pointsforreward >= 7: 
-                    prizeComment="you won first place"
-                elif pointsforreward >= 4 and points < 7:
-                    prizeComment="you won second place"
-                elif pointsforreward >= 1 and points < 4:
-                    prizeComment="you won third place"
+                    prizeComment="you won the Gold Medal"
+                elif pointsforreward >= 4 and pointsforreward < 7:
+                    prizeComment="you won pizza"
+                elif pointsforreward >= 1 and pointsforreward < 4:
+                    prizeComment="you won a North Creek tshirt"
 
                 eachp.append(prizeComment)
                 print(eachp)
@@ -171,11 +177,11 @@ def rewards():
                 winnerList.append(eachWinner)
                 #print(points)
                 if points >= 7:
-                    rewardsString = "you won first place"        
+                    rewardsString = "you won the Gold Medal"        
                 elif points >= 4 and points < 7:
-                    rewardsString = "you won second place"
+                    rewardsString = "you won pizza"
                 elif points >= 1 and points < 4:
-                    rewardsString = "you won third place"
+                    rewardsString = "you won a North Creek tshirt"
                 return render_template("rewards.html", highestPbyGrades=highestPbyGradeList, winner=winnerList, reward=rewardsString)
 
     return render_template("rewards.html", highestPbyGrades=highestPbyGradeList)
