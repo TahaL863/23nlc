@@ -4,16 +4,18 @@
 <form method="post">
   <h3 align="center">Reports</h3>
   <div class="form-group">
-  <label for="student_id">Select the grade level you want to view</label> 
-  <input type="text" class="form-control" name="grade_level" placeholder="Enter grade level to filter">
-  <!-- <select name=grades>
-    {% for eachgrade in grades %}
-    <option value="{{grade}}" SELECTED> {{grades}}
-    {% endfor %} -->
+    <label align="center">View Student by Grade. Drop down will dynamically allow only those grades with saved info</label>
+    <select name="grades_field" class="form-control" method="GET" action="/">
+      <option value="{{gradesInput[0]}}" selected> Select grade level and click button below to filter reports</option>    
+      {% for eachgrade in gradesInput %}
+        <option value= "{{eachgrade}}"> Grade {{eachgrade}}</option>"
+      {% endfor %}
+    </select>
 </div>
-<br />
 <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+<br />
+<br />
  <table id="data" class="table table-striped">
   <thead>
     <tr align="center">
@@ -32,4 +34,19 @@
     {% endfor %}
   </tbody>
 </table>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    $(document).ready(function () {
+      $('#data').DataTable({
+        columns: [
+          null,
+          {searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          null],
+      });
+    });
+  </script>
 {% endblock %}

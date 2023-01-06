@@ -65,8 +65,9 @@ def login():
 @auth.route('/reports', methods=['GET','POST'])
 def reports():
     if request.method == 'POST':
-        grade_level = request.form.get('grade_level')
-        print('Grade level selected for report is:' + grade_level)
+        #grade_level = request.form.get('grade_level')
+        grade_level = request.form.get('grades_field')
+        print('Grade level selected for report is:' + str(grade_level))
     else:
         grade_level = None
 
@@ -90,8 +91,10 @@ def reports():
     
     # sort results by grade
     studentPointsList.sort(key=lambda eachStudentPoint: eachStudentPoint[1], reverse=True)
-    print(studentPointsList)
-    return render_template("reports.html", studentView=studentPointsList)
+    #print(studentPointsList)
+
+    gradesInputList = [9, 10, 11]
+    return render_template("reports.html", studentView=studentPointsList, gradesInput=gradesInputList)
 
 def get_rewards():
         # query every distinct user by student id
