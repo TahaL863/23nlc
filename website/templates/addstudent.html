@@ -5,10 +5,21 @@
 <form method="post">
   <label align="center">Enter Student info and click submit to Save into portal</label>
   <div class="form-group">
-  <input type="text" class="form-control" name="student_name" placeholder="enter student name e.g. <first last>">
-  <input type="text" class="form-control" name="event_name" placeholder="enter event name">
-  <input type="text" class="form-control" name="grade_level" placeholder="enter grade level">
-  
+  <input type="text" class="form-control" name="student_name" placeholder="enter student name as: <first last>">
+
+  <select name="event_name" class="form-control" method="GET" action="/">
+    <option value="{{eventsInput[0]}}" selected> Select event</option>    
+        {% for eachEvent in eventsInput %}
+            <option value= "{{eachEvent}}"> {{eachEvent}}</option>"
+        {% endfor %}
+  </select>
+
+  <select name="grades_field" class="form-control" method="GET" action="/">
+    <option value="{{gradesInput[0]}}" selected> Select grade</option>    
+    {% for eachgrade in gradesInput %}
+      <option value= "{{eachgrade}}"> Grade {{eachgrade}}</option>"
+    {% endfor %}
+  </select>  
 </div>
 <br />
 <button type="submit" class="btn btn-primary">Submit</button>

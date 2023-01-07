@@ -4,15 +4,15 @@
 <form method="post">
   <h3 align="center">Reports</h3>
   <div class="form-group">
-    <label align="center">View Students by Grade. Drop down will dynamically allow only those grades with saved info</label>
+    <label align="center">View Students by Grade. Drop down will dynamically allow only grades with existing student entries</label>
     <select name="grades_field" class="form-control" method="GET" action="/">
-      <option value="{{gradesInput[0]}}" selected> Select grade level and click button below to filter reports</option>    
+      <option value="{{gradesInput[0]}}" selected> Select grade level (Click below to clear selection) </option>    
       {% for eachgrade in gradesInput %}
         <option value= "{{eachgrade}}"> Grade {{eachgrade}}</option>"
       {% endfor %}
     </select>
 </div>
-<button type="submit" class="btn btn-primary">Submit</button>
+<button type="submit" class="btn btn-primary">View all</button>
 </form>
 <br />
 <br />

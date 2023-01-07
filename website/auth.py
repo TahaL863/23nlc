@@ -5,6 +5,11 @@ import random
 auth = Blueprint('auth', __name__)
 from apscheduler.schedulers.blocking import BlockingScheduler
 
+eventsInputList = ["basketball", "singing", "football"]           
+
+# Used to add students who can be in any high school grade
+static_grade_set = ["9", "10", "11", "12"]
+
 def loaddb():
     #reports_scheduler()
     users = User.query.all()
@@ -21,55 +26,48 @@ def loaddb():
             print(everyuser)
             print("is none") 
 
+@auth.route('/', methods=['GET'])
 def reports_scheduler():
     print('Scheduler initialized')
     scheduler = BlockingScheduler()
     scheduler.add_job(get_rewards(), 'interval', seconds=10) 
     #hours=0.017)
     scheduler.start()
-  
 
-@auth.route('/', methods=['GET', 'POST'])
-def home():
-    # if request.method == 'POST':
-    #     student_name = request.form.get('student_name')
-    #     event_name = request.form.get('event_name')
-    #     grade_level = request.form.get('grade_level')
-    #     spacecheck=student_name.split()
-    #     # print(spacecheck)
-    #     # print('Len:' + str(len(spacecheck)))
-    #     # print(student_name.isalpha())
-
-    #     # Name validation
-    #     if len(spacecheck) == 2 and spacecheck[0].isalpha() and spacecheck[1].isalpha():
-    #         flash('Entry inputed', category='success')
-    #         new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_level)
-    #         db.session.add(new_user)
-    #         db.session.commit()
-        
-    #         print('Field written to DB')
-    #         user = User.query.filter_by(student_name=student_name).first()
-
-    #         print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)
-    #     else:
-    #         flash('student name must be alphabetic and have one space in between', category='error')           
-    return render_template("home.html")
-     
 @auth.route("/login", methods=['GET'])
 def login():
-    print('IN LOGIN')
     if request.method == 'GET':
         loaddb()
-    return render_template("login.html", message="we will introduce log in ability to portal in future. Press back in browser ")    
+    return render_template("login.html", message="Under Construction - We will introduce login ability to portal in future.")    
+       
+@auth.route('/addstudent', methods=['GET', 'POST'])
+def addstudent():
+    if request.method == 'POST':
+        student_name = request.form.get('student_name')
+        event_name = request.form.get('event_name')
+        grade_selected = request.form.get('grades_field')
+        spacecheck=student_name.split()
 
-    # return "<p>We will introduce log in ability to portal in future. Press back in browser </p>"
+        # Name validation
+        if len(spacecheck) == 2 and spacecheck[0].isalpha() and spacecheck[1].isalpha():
+            flash('Sudent successfully added', category='success')
+            new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_selected)
+            db.session.add(new_user)
+            db.session.commit()
+        
+            print('Field written to DB')
+            user = User.query.filter_by(student_name=student_name).first()
+
+            print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)
+        else:
+            flash('student name must be alphabetic and have one space in between', category='error')           
+    return render_template("addstudent.html", eventsInput=eventsInputList, gradesInput=static_grade_set)
+
 
 @auth.route('/reports', methods=['GET','POST'])
 def reports():
     if request.method == 'POST':
-        #grade_level = request.form.get('grade_level')
         grade_level = request.form.get('grades_field')
-        print('Grade level selected for report is:' + str(grade_level))
         flash('Grade level selected is ' + grade_level, category='success')           
     else:
         grade_level = None
@@ -82,15 +80,15 @@ def reports():
     studentPointsList=[]
 
     # Used to dynamically store unique grades for which we have students and use it in drop downs
-    grade_dict = {}
+    grade_set = {}
 
     for eachUStd in uniqueStudentList:
-        #print(eachUStd)
+
+        if eachUStd.grade_level not in grade_set.keys():
+            grade_set[eachUStd.grade_level] = eachUStd.grade_level
+        
         # not grade level means it was empty
         if grade_level is None or not grade_level or eachUStd.grade_level == grade_level:
-
-            if eachUStd.grade_level not in grade_dict.keys():
-                grade_dict[eachUStd.grade_level] = eachUStd.grade_level
 
             pointsPerStudent = User.query.filter_by(student_name=eachUStd.student_name).count()
             eachStudentPoint = []
@@ -101,21 +99,14 @@ def reports():
     
     # sort results by grade
     studentPointsList.sort(key=lambda eachStudentPoint: eachStudentPoint[1], reverse=True)
-    #print(studentPointsList)
+    return render_template("reports.html", studentView=studentPointsList, gradesInput=grade_set)
 
-    return render_template("reports.html", studentView=studentPointsList, gradesInput=grade_dict)
-
-def get_rewards():
+def get_highestPointsByGrade():
         # query every distinct user by student id
         distinctUsers = User.query.with_entities(User.student_name, User.grade_level).distinct()
 
         pointsList = []
         for everyduser in distinctUsers:
-            #print('Student ID: ' + everyduser.student_name + ' Grade Level:' + everyduser.grade_level)
-            #query all rows for each of the above distinct user
-            # allentriesPerUser  = User.query.filter_by(student_name = everyduser.student_name).all()
-            # for user in allentriesPerUser:
-            #     print(user.student_name, user.event_name)
         
             #compile total points for each user
             points = User.query.filter_by(student_name=everyduser.student_name).count()
@@ -131,7 +122,6 @@ def get_rewards():
         # telling sort to use eachpoint[2] which is 2nd field called points as the sorting criteria
         sorted(pointsList, key=lambda eachpoint: eachpoint[2])
         pointsList.sort(key=lambda each_item: each_item[2], reverse=True)
-        #items.sort(key=lambda each_item: each_item[1], reverse=True)
 
         # dictionary to see if we already found highest points for that grade
         grade_dict = {}
@@ -146,22 +136,22 @@ def get_rewards():
                 if pointsforreward >= 7: 
                     prizeComment="you won the Gold Medal"
                 elif pointsforreward >= 4 and pointsforreward < 7:
-                    prizeComment="you won pizza"
+                    prizeComment="you won a Pizza"
                 elif pointsforreward >= 1 and pointsforreward < 4:
-                    prizeComment="you won a North Creek tshirt"
+                    prizeComment="you won a North Creek T-shirt"
 
                 eachp.append(prizeComment)
                 print(eachp)
                 highestPbyGradeList.append(eachp)
 
-        return highestPbyGradeList
+        return highestPbyGradeList, grade_dict
 
 
 @auth.route('/rewards', methods =['GET', 'POST'])
 def rewards():
     print('rewards')
         
-    highestPbyGradeList = get_rewards()
+    highestPbyGradeList, grade_dict = get_highestPointsByGrade()
                                
     if request.method == 'POST':
         grade_level = request.form.get('grade_level')
@@ -180,6 +170,19 @@ def rewards():
                 counter = counter+1
             elif counter == random_number:
             
+                #print('First:' + euser.student_name) 
+                #print(highestPbyGradeList)
+                # Random picked one' can't be the highest user (unless its the only user in that grade) so pick the next one
+                isRandomAlreadyPicked = False
+                for evry_std in highestPbyGradeList:
+                    print("First:" + euser.student_name  + " Second: " + evry_std[0])
+                    if maxUsersByGrade > 1 and euser.student_name == evry_std[0]:
+                        isRandomAlreadyPicked = True
+                        break
+
+                if isRandomAlreadyPicked:
+                    continue
+
                 winnerList = []
                 eachWinner = []
                 eachWinner.append(euser.student_name)
@@ -192,12 +195,12 @@ def rewards():
                 if points >= 7:
                     rewardsString = "you won the Gold Medal"        
                 elif points >= 4 and points < 7:
-                    rewardsString = "you won pizza"
+                    rewardsString = "you won a Pizza"
                 elif points >= 1 and points < 4:
-                    rewardsString = "you won a North Creek tshirt"
-                return render_template("rewards.html", highestPbyGrades=highestPbyGradeList, winner=winnerList, reward=rewardsString)
+                    rewardsString = "you won a North Creek T-shirt"
+                return render_template("rewards.html", highestPbyGrades=highestPbyGradeList, gradesInput=grade_dict, winner=winnerList, reward=rewardsString)
 
-    return render_template("rewards.html", highestPbyGrades=highestPbyGradeList)
+    return render_template("rewards.html", highestPbyGrades=highestPbyGradeList,gradesInput=grade_dict)
 
 @auth.route('/help', methods=['GET', 'POST'])
 def help():
@@ -223,32 +226,3 @@ def remove():
         else:    
             flash('Entry not found', category='error')
     return render_template("remove.html")
-
-@auth.route('/addstudent', methods=['GET', 'POST'])
-def addstudent():
-    if request.method == 'POST':
-        student_name = request.form.get('student_name')
-        event_name = request.form.get('event_name')
-        grade_level = request.form.get('grade_level')
-        spacecheck=student_name.split()
-        # print(spacecheck)
-        # print('Len:' + str(len(spacecheck)))
-        # print(student_name.isalpha())
-
-        # Name validation
-        if len(spacecheck) == 2 and spacecheck[0].isalpha() and spacecheck[1].isalpha():
-            flash('Entry inputed', category='success')
-            new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_level)
-            db.session.add(new_user)
-            db.session.commit()
-        
-            print('Field written to DB')
-            user = User.query.filter_by(student_name=student_name).first()
-
-            print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)
-        else:
-            flash('student name must be alphabetic and have one space in between', category='error')           
-    return render_template("addstudent.html")
-
-      
-      

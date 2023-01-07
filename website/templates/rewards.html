@@ -25,15 +25,17 @@
         </tbody>
       </table>    
     <div class="form-group">
-    <label for="student_id">select a grade level to choose a random winner from</label> 
-    <input type="text" class="form-control" name="grade_level" placeholder="enter grade level">
+    <label for="grade_level">Select a grade level to choose a random winner from. Drop down will dynamically allow only grades with existing student entries</label> 
+    <select name="grade_level" class="form-control" method="GET" action="/" onchange="this.form.submit()">
+      <option value="{{gradesInput[0]}}" selected> Select Grade</option>    
+      {% for eachgrade in gradesInput %}
+        <option value= "{{eachgrade}}"> Grade {{eachgrade}}</option>"
+      {% endfor %}
+    </select>  
     </div>
-<br />
-<button type="submit" class="btn btn-primary">Submit</button>
-</form>
 
-<!-- {{winner}}
-{{reward}} -->
+<br />
+</form>
 
 <table id="data" class="table table-striped">
     <thead>
