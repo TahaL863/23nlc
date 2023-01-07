@@ -11,8 +11,11 @@ eventsInputList = ["basketball", "football", "soccer", "baseball", "track",
 # Used to add students who can be in any high school grade
 static_grade_set = ["9", "10", "11", "12"]
 
+# these are global so they get populated with scheduler task as well
+highestPbyGradeList = []
+grade_dict = {}
+
 def loaddb():
-    #reports_scheduler()
     users = User.query.all()
     print(users) 
     
@@ -27,13 +30,18 @@ def loaddb():
             print(everyuser)
             print("is none") 
 
+def scheduler_func():
+    highestPbyGradeList, grade_dict = get_highestPointsByGrade()
+    print('scheduler executed')
+ 
+
 @auth.route('/', methods=['GET'])
 def reports_scheduler():
     print('Scheduler initialized')
-    # scheduler = BlockingScheduler()
-    # scheduler.add_job(get_highestPointsByGrade(), 'interval', seconds=10) 
+    scheduler = BlockingScheduler()
+    scheduler.add_job(scheduler_func(), 'interval', seconds=10) 
     #hours=0.017)
-    #scheduler.start()
+    scheduler.start()
     return render_template("home.html", userimage = filename)
 
 @auth.route("/login", methods=['GET'])
@@ -70,8 +78,6 @@ def addstudent():
 def reports():
     if request.method == 'POST':
         grade_level = request.form.get('grades_field')
-        print("Printing gradelevel")
-        print(grade_level)
 
         if grade_level is None or grade_level == "":
             flash('No grade selected', category='success')
@@ -111,6 +117,7 @@ def reports():
     return render_template("reports.html", studentView=studentPointsList, gradesInput=grade_set)
 
 def get_highestPointsByGrade():
+
         # query every distinct user by student id
         distinctUsers = User.query.with_entities(User.student_name, User.grade_level).distinct()
 
@@ -150,7 +157,7 @@ def get_highestPointsByGrade():
                     prizeComment="you won a North Creek T-shirt"
 
                 eachp.append(prizeComment)
-                print(eachp)
+                #print(eachp)
                 highestPbyGradeList.append(eachp)
 
         return highestPbyGradeList, grade_dict
@@ -159,55 +166,64 @@ def get_highestPointsByGrade():
 @auth.route('/rewards', methods =['GET', 'POST'])
 def rewards():
     print('rewards')
-        
+                                      
+    # this call is also made from scheduler which computes non UI reports and displays them once one proceeds to reports page
     highestPbyGradeList, grade_dict = get_highestPointsByGrade()
-                               
+
     if request.method == 'POST':
         grade_level = request.form.get('grade_level')
         flash('Grade level selected is ' + grade_level, category='success')
         maxUsersByGrade = User.query.filter_by(grade_level=grade_level).count()
-        # print('MaxUsersByGrade:' + str(maxUsersByGrade))
+        print('MaxUsersByGrade:' + str(maxUsersByGrade))
 
         random_number = random.randint(1, maxUsersByGrade)
-        # print('Random number selected is:' + str(random_number))
+        print('Random number selected is:' + str(random_number))
 
         allUsersInSelectedGrade = User.query.filter_by(grade_level=grade_level).all()
 
-        counter = 1
+        print("All users in selected grade")
+        print(allUsersInSelectedGrade)
+
+        for a in allUsersInSelectedGrade:
+            print(a.student_name + " ", a.grade_level)
+
+        unique_user_dict = {}
+        highestScoreStudent = ""
+
         for euser in allUsersInSelectedGrade:
-            if counter < random_number:
-                counter = counter+1
-            elif counter == random_number:
-            
-                #print('First:' + euser.student_name) 
-                #print(highestPbyGradeList)
+
+            # if seeing user for the first time
+            if euser.student_name not in unique_user_dict.keys():
+                unique_user_dict[euser.student_name] = euser.student_name
+
                 # Random picked one' can't be the highest user (unless its the only user in that grade) so pick the next one
-                isRandomAlreadyPicked = False
                 for evry_std in highestPbyGradeList:
                     print("First:" + euser.student_name  + " Second: " + evry_std[0])
                     if maxUsersByGrade > 1 and euser.student_name == evry_std[0]:
-                        isRandomAlreadyPicked = True
+                        highestScoreStudent = euser.student_name 
                         break
-
-                if isRandomAlreadyPicked:
-                    continue
-
-                winnerList = []
-                eachWinner = []
-                eachWinner.append(euser.student_name)
-                eachWinner.append(euser.grade_level)
+        
+        counter = 0
+        for key in unique_user_dict:
+            if key != highestScoreStudent and highestScoreStudent != "":
+                counter = counter +1
+                if counter == (random_number%len(unique_user_dict)):
+                    winnerList = []
+                    eachWinner = []
+                    eachWinner.append(key)
+                    eachWinner.append(grade_level)
                 
-                points = User.query.filter_by(student_name=euser.student_name).count()
-                eachWinner.append(points)
-                winnerList.append(eachWinner)
-                #print(points)
-                if points >= 7:
-                    rewardsString = "you won the Gold Medal"        
-                elif points >= 4 and points < 7:
-                    rewardsString = "you won a Pizza"
-                elif points >= 1 and points < 4:
-                    rewardsString = "you won a North Creek T-shirt"
-                return render_template("rewards.html", highestPbyGrades=highestPbyGradeList, gradesInput=grade_dict, winner=winnerList, reward=rewardsString)
+                    points = User.query.filter_by(student_name=key).count()
+                    eachWinner.append(points)
+                    winnerList.append(eachWinner)
+                    #print(points)
+                    if points >= 7:
+                        rewardsString = "you won the Gold Medal"        
+                    elif points >= 4 and points < 7:
+                        rewardsString = "you won a Pizza"
+                    elif points >= 1 and points < 4:
+                        rewardsString = "you won a North Creek T-shirt"
+                    return render_template("rewards.html", highestPbyGrades=highestPbyGradeList, gradesInput=grade_dict, winner=winnerList, reward=rewardsString)
 
     return render_template("rewards.html", highestPbyGrades=highestPbyGradeList,gradesInput=grade_dict)
 
