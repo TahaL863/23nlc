@@ -136,7 +136,7 @@ def get_highestPointsByGrade():
             #print('Points are:' + str(points))
         
         # telling sort to use eachpoint[2] which is 2nd field called points as the sorting criteria
-        sorted(pointsList, key=lambda eachpoint: eachpoint[2])
+        
         pointsList.sort(key=lambda each_item: each_item[2], reverse=True)
 
         # dictionary to see if we already found highest points for that grade
@@ -166,7 +166,9 @@ def get_highestPointsByGrade():
 @auth.route('/rewards', methods =['GET', 'POST'])
 def rewards():
     print('rewards')
-                                      
+    # Display when there was only a single student in class who was already highest winner
+    noRandomElement = ""
+
     # this call is also made from scheduler which computes non UI reports and displays them once one proceeds to reports page
     highestPbyGradeList, grade_dict = get_highestPointsByGrade()
 
@@ -181,11 +183,11 @@ def rewards():
 
         allUsersInSelectedGrade = User.query.filter_by(grade_level=grade_level).all()
 
-        print("All users in selected grade")
-        print(allUsersInSelectedGrade)
+        # print("All users in selected grade")
+        # print(allUsersInSelectedGrade)
 
-        for a in allUsersInSelectedGrade:
-            print(a.student_name + " ", a.grade_level)
+        # for a in allUsersInSelectedGrade:
+        #     print(a.student_name + " ", a.grade_level)
 
         unique_user_dict = {}
         highestScoreStudent = ""
@@ -198,7 +200,7 @@ def rewards():
 
                 # Random picked one' can't be the highest user (unless its the only user in that grade) so pick the next one
                 for evry_std in highestPbyGradeList:
-                    print("First:" + euser.student_name  + " Second: " + evry_std[0])
+                    #print("Each user in Curr Grade:" + euser.student_name  + " highPbyGradeList: " + evry_std[0])
                     if maxUsersByGrade > 1 and euser.student_name == evry_std[0]:
                         highestScoreStudent = euser.student_name 
                         break
@@ -224,8 +226,9 @@ def rewards():
                     elif points >= 1 and points < 4:
                         rewardsString = "you won a North Creek T-shirt"
                     return render_template("rewards.html", highestPbyGrades=highestPbyGradeList, gradesInput=grade_dict, winner=winnerList, reward=rewardsString)
+        noRandomElement = 'Could not find a second winner to choose as random'
 
-    return render_template("rewards.html", highestPbyGrades=highestPbyGradeList,gradesInput=grade_dict)
+    return render_template("rewards.html", highestPbyGrades=highestPbyGradeList,gradesInput=grade_dict, noRandomElement=noRandomElement)
 
 @auth.route('/help', methods=['GET', 'POST'])
 def help():
