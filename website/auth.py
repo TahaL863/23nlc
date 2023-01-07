@@ -30,7 +30,7 @@ def loaddb():
 def reports_scheduler():
     print('Scheduler initialized')
     scheduler = BlockingScheduler()
-    scheduler.add_job(get_rewards(), 'interval', seconds=10) 
+    scheduler.add_job(get_highestPointsByGrade(), 'interval', seconds=10) 
     #hours=0.017)
     scheduler.start()
 
@@ -68,7 +68,14 @@ def addstudent():
 def reports():
     if request.method == 'POST':
         grade_level = request.form.get('grades_field')
-        flash('Grade level selected is ' + grade_level, category='success')           
+        print("Printing gradelevel")
+        print(grade_level)
+
+        if grade_level is None or grade_level == "":
+            flash('No grade selected', category='success')
+        else:
+            flash('Grade level selected is ' + grade_level, category='success')
+
     else:
         grade_level = None
 
