@@ -59,8 +59,9 @@ def login():
     print('IN LOGIN')
     if request.method == 'GET':
         loaddb()
+    return render_template("login.html", message="we will introduce log in ability to portal in future. Press back in browser ")    
 
-    return "<p>We will introduce log in ability to portal in future. Press back in browser </p>"
+    # return "<p>We will introduce log in ability to portal in future. Press back in browser </p>"
 
 @auth.route('/reports', methods=['GET','POST'])
 def reports():
@@ -195,4 +196,7 @@ def rewards():
 
     return render_template("rewards.html", highestPbyGrades=highestPbyGradeList)
 
+@auth.route('/main', methods=['GET', 'POST'])
+def main():
+    return render_template("main.html")
       
