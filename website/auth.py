@@ -5,7 +5,8 @@ import random
 auth = Blueprint('auth', __name__)
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-eventsInputList = ["basketball", "singing", "football"]           
+eventsInputList = ["basketball", "football", "soccer", "baseball", "track",
+                    "coding", "writing", "speech", "music", "art"]
 
 # Used to add students who can be in any high school grade
 static_grade_set = ["9", "10", "11", "12"]
