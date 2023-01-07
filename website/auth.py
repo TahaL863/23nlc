@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template, flash
 from .models import User
-from . import db
-import random
+from . import db, filename
+import random, os
 auth = Blueprint('auth', __name__)
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -30,10 +30,11 @@ def loaddb():
 @auth.route('/', methods=['GET'])
 def reports_scheduler():
     print('Scheduler initialized')
-    scheduler = BlockingScheduler()
-    scheduler.add_job(get_highestPointsByGrade(), 'interval', seconds=10) 
+    # scheduler = BlockingScheduler()
+    # scheduler.add_job(get_highestPointsByGrade(), 'interval', seconds=10) 
     #hours=0.017)
-    scheduler.start()
+    #scheduler.start()
+    return render_template("home.html", userimage = filename)
 
 @auth.route("/login", methods=['GET'])
 def login():

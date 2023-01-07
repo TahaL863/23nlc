@@ -1,13 +1,19 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from os import path
+import os
 db = SQLAlchemy()
 DB_NAME = "database.db"
+PHOTO_FOLDER = os.path.join('static')
+filename = ""
 
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'tahas first key'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}' 
+    app.config['UPLOAD_FOLDER'] = PHOTO_FOLDER
+    filename = os.path.join(app.config['UPLOAD_FOLDER'], 'northcreek.jpeg')
+    print(filename)
+
     print(app.config['SQLALCHEMY_DATABASE_URI'])
     db.init_app(app)
     
