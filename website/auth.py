@@ -27,31 +27,32 @@ def reports_scheduler():
     scheduler.add_job(get_rewards(), 'interval', seconds=10) 
     #hours=0.017)
     scheduler.start()
+  
 
 @auth.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'POST':
-        student_name = request.form.get('student_name')
-        event_name = request.form.get('event_name')
-        grade_level = request.form.get('grade_level')
-        spacecheck=student_name.split()
-        # print(spacecheck)
-        # print('Len:' + str(len(spacecheck)))
-        # print(student_name.isalpha())
+    # if request.method == 'POST':
+    #     student_name = request.form.get('student_name')
+    #     event_name = request.form.get('event_name')
+    #     grade_level = request.form.get('grade_level')
+    #     spacecheck=student_name.split()
+    #     # print(spacecheck)
+    #     # print('Len:' + str(len(spacecheck)))
+    #     # print(student_name.isalpha())
 
-        # Name validation
-        if len(spacecheck) == 2 and spacecheck[0].isalpha() and spacecheck[1].isalpha():
-            flash('Entry inputed', category='success')
-            new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_level)
-            db.session.add(new_user)
-            db.session.commit()
+    #     # Name validation
+    #     if len(spacecheck) == 2 and spacecheck[0].isalpha() and spacecheck[1].isalpha():
+    #         flash('Entry inputed', category='success')
+    #         new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_level)
+    #         db.session.add(new_user)
+    #         db.session.commit()
         
-            print('Field written to DB')
-            user = User.query.filter_by(student_name=student_name).first()
+    #         print('Field written to DB')
+    #         user = User.query.filter_by(student_name=student_name).first()
 
-            print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)
-        else:
-            flash('student name must be alphabetic and have one space in between', category='error')           
+    #         print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)
+    #     else:
+    #         flash('student name must be alphabetic and have one space in between', category='error')           
     return render_template("home.html")
      
 @auth.route("/login", methods=['GET'])
@@ -69,6 +70,7 @@ def reports():
         #grade_level = request.form.get('grade_level')
         grade_level = request.form.get('grades_field')
         print('Grade level selected for report is:' + str(grade_level))
+        flash('Grade level selected is ' + grade_level, category='success')           
     else:
         grade_level = None
 
@@ -163,6 +165,7 @@ def rewards():
                                
     if request.method == 'POST':
         grade_level = request.form.get('grade_level')
+        flash('Grade level selected is ' + grade_level, category='success')
         maxUsersByGrade = User.query.filter_by(grade_level=grade_level).count()
         # print('MaxUsersByGrade:' + str(maxUsersByGrade))
 
@@ -196,7 +199,56 @@ def rewards():
 
     return render_template("rewards.html", highestPbyGrades=highestPbyGradeList)
 
-@auth.route('/main', methods=['GET', 'POST'])
-def main():
-    return render_template("main.html")
+@auth.route('/help', methods=['GET', 'POST'])
+def help():
+    return render_template("help.html")
+
+@auth.route('/remove', methods=['GET', 'POST'])
+def remove():
+    if request.method == 'POST':
+        student_name = request.form.get('student_name')
+        event_name = request.form.get('event_name')
+        grade_level = request.form.get('grade_level')
+        checker = User.query.filter_by(student_name=student_name).count()
+        #checker2 = User.query.filter_by(event_name=event_name).count()
+        #checker3 = User.query.filter_by(grade_level=event_name).count()
+        if checker >= 1:
+            #event_name = request.form.get('event_name')
+            #User.query.filter_by(student_name=student_name):
+            #grade_level = request.form.get('grade_level')
+            User.query.filter_by(student_name=student_name, event_name=event_name, grade_level=grade_level).delete()
+            db.session.commit()
+            flash('Entry removed', category='success')
+            #return render_template("remove.html")
+        else:    
+            flash('Entry not found', category='error')
+    return render_template("remove.html")
+
+@auth.route('/addstudent', methods=['GET', 'POST'])
+def addstudent():
+    if request.method == 'POST':
+        student_name = request.form.get('student_name')
+        event_name = request.form.get('event_name')
+        grade_level = request.form.get('grade_level')
+        spacecheck=student_name.split()
+        # print(spacecheck)
+        # print('Len:' + str(len(spacecheck)))
+        # print(student_name.isalpha())
+
+        # Name validation
+        if len(spacecheck) == 2 and spacecheck[0].isalpha() and spacecheck[1].isalpha():
+            flash('Entry inputed', category='success')
+            new_user = User(student_name=student_name, event_name=event_name, grade_level=grade_level)
+            db.session.add(new_user)
+            db.session.commit()
+        
+            print('Field written to DB')
+            user = User.query.filter_by(student_name=student_name).first()
+
+            print('Event ID:' + user.event_name, ' Grade Level:'  + user.grade_level)
+        else:
+            flash('student name must be alphabetic and have one space in between', category='error')           
+    return render_template("addstudent.html")
+
+      
       
