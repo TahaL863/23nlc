@@ -39,8 +39,7 @@ def scheduler_func():
 def reports_scheduler():
     print('Scheduler initialized')
     scheduler = BlockingScheduler()
-    scheduler.add_job(scheduler_func(), 'interval', seconds=10) 
-    #hours=0.017)
+    scheduler.add_job(scheduler_func(), 'interval', hours=1460)
     scheduler.start()
     return render_template("home.html", userimage = filename)
 
