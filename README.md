@@ -1,4 +1,4 @@
-# 23nlc
+# Student Participation Tracker
 FBLA coding and programming student involvement app
 
 
